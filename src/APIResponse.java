@@ -1,14 +1,14 @@
-import java.util.ArrayList;
+import java.util.List;
 
 public class APIResponse {
     SearchInfo searchInformation;
-    ArrayList<Item> items;
+    Item[] items;
 
     public SearchInfo getSearchInformation() {
         return searchInformation;
     }
 
-    public ArrayList<Item> getItems() {
+    public Item[] getItems() {
         return items;
     }
 }
