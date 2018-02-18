@@ -9,7 +9,7 @@
 <head>
   <title>HomePage</title>
 </head>
-<form action="MainPageMockUp.jsp">
+<form action="Servlet">
   <div id="content"></div>
   <input type="text" id="topic" name="topic">
   <input type="submit" value="CreateCollage" id="submitButton">
