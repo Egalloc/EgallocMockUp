@@ -37,9 +37,7 @@ public class APICommunicator {
         parameters.put("key", "AIzaSyDaJ74IGt2X5miRWhriFOImLkBSo1G_dNw");
         parameters.put("cx", "003668417098658282383:2ym3vezfm44");
         parameters.put("start", Integer.toString(startIndex));
-        parameters.put("imgSize", "medium");
         parameters.put("searchType", "image");
-        parameters.put("fileType", "png");
         String query = ParameterStringBuilder.getParamsString(parameters);
 
         HttpURLConnection connection = (HttpURLConnection) new URL(url + "?" + query).openConnection();
@@ -52,14 +50,19 @@ public class APICommunicator {
 
     // This method extract image from response and add to the array
     private void parseResponseForImages(InputStream response) {
-        try (Scanner scanner = new Scanner(response)) {
-            String responseBody = scanner.useDelimiter("\\A").next();
+        // Check NPE
+        if (response != null) {
+            try (Scanner scanner = new Scanner(response)) {
+                String responseBody = scanner.useDelimiter("\\A").next();
 
-            //System.out.println(responseBody);
-            Gson gson = new Gson();
-            APIResponse apiResponse = gson.fromJson(responseBody, APIResponse.class);
-            for (Item item : apiResponse.getItems()) {
-                imageFilePaths.add(item.getLink());
+                // parse the JSON
+                Gson gson = new Gson();
+                APIResponse apiResponse = gson.fromJson(responseBody, APIResponse.class);
+                if (apiResponse.getItems() != null) {
+                    for (Item item : apiResponse.getItems()) {
+                        imageFilePaths.add(item.getLink());
+                    }
+                }
             }
         }
     }
