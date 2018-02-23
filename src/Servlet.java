@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
 @WebServlet("/Servlet")
 public class Servlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -13,9 +14,11 @@ public class Servlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         APICommunicator apiCommunicator = new APICommunicator(request.getParameter("topic"));
-        for (String url : apiCommunicator.getImageFilePaths()) {
-            System.out.println(url);
-        }
+
+        System.out.println("Size of image url arrays" + apiCommunicator.getImageFilePaths().size());
+
+        CollageBuilder cb = new CollageBuilder(apiCommunicator.getImageFilePaths());
+
     }
 
 }

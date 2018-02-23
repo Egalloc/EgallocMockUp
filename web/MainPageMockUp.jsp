@@ -28,15 +28,15 @@
     <!-- Request 3 times to get 30 pictures-->
     <script src="https://www.googleapis.com/customsearch/v1?key=AIzaSyDaJ74IGt2X5miRWhriFOImLkBSo1G_dNw
         &cx=003668417098658282383:2ym3vezfm44&q=<%=request.getParameter("topic")%>
-        &start=1&imgSize=medium&searchType=image&filtetype=png&callback=hndlr">
+        &start=1&searchType=image&callback=hndlr">
     </script>
     <script src="https://www.googleapis.com/customsearch/v1?key=AIzaSyDaJ74IGt2X5miRWhriFOImLkBSo1G_dNw
             &cx=003668417098658282383:2ym3vezfm44&q=<%=request.getParameter("topic")%>
-            &start=11&imgSize=medium&searchType=image&filtetype=png&callback=hndlr">
+            &start=11&searchType=image&callback=hndlr">
     </script>
     <script src="https://www.googleapis.com/customsearch/v1?key=AIzaSyDaJ74IGt2X5miRWhriFOImLkBSo1G_dNw
             &cx=003668417098658282383:2ym3vezfm44&q=<%=request.getParameter("topic")%>
-            &start=21&imgSize=medium&searchType=image&filtetype=png&callback=hndlr">
+            &start=21&searchType=image&callback=hndlr">
     </script>
     <script>
         // Add the total response time at the top
