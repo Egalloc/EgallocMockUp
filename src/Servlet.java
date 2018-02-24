@@ -19,6 +19,7 @@ public class Servlet extends HttpServlet {
 
         CollageBuilder cb = new CollageBuilder(apiCommunicator.getImageFilePaths());
 
+        cb.createCollageWithImages();
     }
 
 }
