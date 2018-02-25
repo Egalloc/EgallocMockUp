@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -38,7 +37,7 @@ public class APICommunicator {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("q", keyword);
         parameters.put("key", "AIzaSyDaJ74IGt2X5miRWhriFOImLkBSo1G_dNw");
-        parameters.put("cx", "003668417098658282383:bnmw9zn8td8");
+        parameters.put("cx", "003668417098658282383:2ym3vezfm44");
         parameters.put("start", Integer.toString(startIndex));
         parameters.put("searchType", "image");
         String query = ParameterStringBuilder.getParamsString(parameters);

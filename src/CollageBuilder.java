@@ -1,12 +1,13 @@
+import javafx.util.Pair;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 
 public class CollageBuilder {
     private List<BufferedImage> images = new ArrayList<>();
@@ -21,55 +22,69 @@ public class CollageBuilder {
     public void createCollageWithImages(int width, int height) {
         BufferedImage collageSpace = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
         Graphics2D g = collageSpace.createGraphics();
-        ArrayList<Double> angles = GenerateAngles();
+
+        PriorityQueue<Double> angles = generateAngles();
+
         g.setColor(Color.white);
-        int numPixels = (int) (width*height*1.5+1);
+        int numPixels = (int) (width * height * 1.5 + 1);
 
         for (int i = 0; i < 30; i++) {
+
             int newWidth = (int) Math.sqrt(numPixels/(30-i));
             int newHeight = (int) Math.sqrt(numPixels/(30-i));
+            double angle = Math.toRadians(angles.poll());
+
             System.out.println("New width for this image " + i + "is " + newWidth);
             System.out.println("New height for this image " + i + "is " + newHeight);
             System.out.println("Remaining pixels: " + numPixels);
+
+
+            // Draw the first image
             if(i == 0) {
-                DrawFirstImage(images.get(i), angles.get(29), g, width, height);
-                System.out.println("The min angle:" + angles.get(29));
-                double angle = Math.toRadians(angles.get(29));
-                int targetWidth = (int)(width * Math.cos(angle) + Math.abs(height * Math.sin(angle) + 1));
-                int targetHeight = (int)(width * Math.abs(Math.sin(angle)) + height * Math.cos(angle) + 1);
+                drawFirstImage(images.get(i), angle, g, width, height);
+                System.out.println("The min angle:" + angle);
+                int targetWidth = (int)(width * Math.abs(Math.cos(angle)) +  height * Math.abs(Math.sin(angle)) + 1);
+                int targetHeight = (int)(width * Math.abs(Math.sin(angle)) + height * Math.abs(Math.cos(angle)) + 1);
                 System.out.println("Target widith is " + targetWidth);
                 System.out.println("Target height is " + targetHeight);
-                numPixels = numPixels - targetWidth*targetHeight;
+                numPixels = numPixels - targetWidth * targetHeight;
             }
+
             else if (i  < 11) {
-                System.out.println("Angle for this image" + (i-1) + " is" + angles.get(i-1));
-                double angle = Math.toRadians(angles.get(i-1));
                 AffineTransform original = g.getTransform();
-                g.rotate(angle, width/2, height/2);
-                BufferedImage filler = resize(images.get(i),newWidth, newHeight);
-                g.drawImage(filler,100 + (i - 1) * (width - 200) / 10, 50, null);
+                g.rotate(angle, width / 2, height / 2);
+                BufferedImage filler = resize(images.get(i), newWidth, newHeight);
+
+                drawImageWithNewCoordinate(100 + (i - 1) * (width - 200) / 10,50, angle, g, filler);
+
                 numPixels = numPixels - newWidth*newHeight;
                 g.setTransform(original);
             }
 
             else if (i < 21) {
                 AffineTransform original = g.getTransform();
-                g.rotate(Math.toRadians(angles.get(i-1)), width/2, height/2);
+                g.rotate(angle, width / 2, height / 2);
                 BufferedImage filler = resize(images.get(i),newWidth, newHeight);
-                g.drawImage(filler, 100 + (i - 11) * (width - 200) / 10, 50 + (height - 100) / 3 , null);
-                numPixels = numPixels - newWidth*newHeight;
+
+                drawImageWithNewCoordinate(50 + (i - 11) * (width - 100) / 10,50 + (height - 100) / 3, angle, g, filler);
+
+
+                numPixels = numPixels - newWidth * newHeight;
                 g.setTransform(original);
             } else {
                 AffineTransform original = g.getTransform();
-                g.rotate(Math.toRadians(angles.get(i-1)), width/2, height/2);
+                g.rotate(angle, width / 2, height / 2);
                 BufferedImage filler = resize(images.get(i),newWidth, newHeight);
-                g.drawImage(filler, 100 + (i - 21) * (width - 200) / 10, 50 + (height - 100) * 2 / 3 , null);
-                numPixels = numPixels - newWidth*newHeight;
+
+                drawImageWithNewCoordinate(50 + (i - 21) * (width - 100) / 10,50 + (height - 100) * 2 / 3, angle, g, filler);
+
+                numPixels = numPixels - newWidth * newHeight;
                 g.setTransform(original);
             }
 
         }
 
+        // TODO: delete this later when everything is checked perfectly
         try {
             File file = new File("/Users/zifanshi/Desktop/Collage.png");
             ImageIO.write(collageSpace, "png", file);
@@ -78,83 +93,79 @@ public class CollageBuilder {
         }
     }
 
+    // TODO: make the transformation working, so that the collage will look perfect
+    private void drawImageWithNewCoordinate(int x, int y, double theta, Graphics2D g, BufferedImage bi) {
+        //Pair<Integer,Integer> newCoordinate = transform(x, y, theta);
+        g.drawImage(bi, x, y,null);
+    }
+
+    // This method adds border to the image
     private BufferedImage addBorder(BufferedImage image){
         //create a new image
         BufferedImage borderedImage = new BufferedImage(image.getWidth() + 6,image.getHeight() + 6,
                 BufferedImage.TYPE_INT_RGB);
         Graphics g = borderedImage.getGraphics();
         g.setColor(Color.white);
-        g.fillRect(0,0,borderedImage.getWidth(),borderedImage.getHeight());
+        g.fillRect(0,0, borderedImage.getWidth(), borderedImage.getHeight());
 
         //draw the old one on the new one
         g.drawImage(image,3,3,null);
         return borderedImage;
     }
 
+    // This resize an image
+    private BufferedImage resize(BufferedImage img, int width, int height) {
+        Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-    public BufferedImage resize(BufferedImage img, int newW, int newH) {
-        Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
-        BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D g2d = dimg.createGraphics();
+        Graphics2D g2d = image.createGraphics();
         g2d.drawImage(tmp, 0, 0, null);
         g2d.dispose();
 
-        return dimg;
+        return image;
     }
 
-
-    public void DrawFirstImage(BufferedImage image, double angle, Graphics2D g, int collageWidth,
+    // This method draws the first image and fill up the whole space
+    private void drawFirstImage(BufferedImage image, double angle, Graphics2D g, int collageWidth,
                                int collageHeight){
-        double angleInRadians = Math.toRadians(angle);
         AffineTransform original = g.getTransform();
-        g.rotate(angleInRadians, collageWidth/2, collageHeight/2);
-        int targetWidth = (int)(collageWidth * Math.cos(angleInRadians) + Math.abs(collageHeight * Math.sin(angleInRadians)) + 1);
-        int targetHeight = (int)(collageWidth * Math.abs(Math.sin(angleInRadians)) + collageHeight * Math.cos(angleInRadians) + 1);
+        g.rotate(angle, collageWidth/2, collageHeight/2);
+        int targetWidth = (int)(collageWidth * Math.cos(angle) + Math.abs(collageHeight * Math.sin(angle)) + 1);
+        int targetHeight = (int)(collageWidth * Math.abs(Math.sin(angle)) + collageHeight * Math.cos(angle) + 1);
         image = resize(image, targetWidth, targetHeight);
         g.drawImage(image,  collageWidth/2 - image.getWidth()/2,  collageHeight/2 - image.getHeight()/2, null);
         g.setTransform(original);
     }
-    public static ArrayList<Double> GenerateAngles()
-    {
-        ArrayList<Double> angles = new ArrayList<Double>();
 
-        double minRange = -45;
-        double maxRange = 45;
-        Boolean validAngles = false;
-        double angleForFirstImage = 0;
+    // This method generates a min heap of random angles. It is compared by absolute values
+    private PriorityQueue<Double> generateAngles()
+    {
+        PriorityQueue<Double> angles = new PriorityQueue<>(30, Comparator.comparingDouble(Math::abs));
 
         Random rand = new Random();
 
-        while(!validAngles)
+        final double MIN_RANGE = -45;
+        final double MAX_RANGE = 45;
+
+        while(true)
         {
             angles.clear();
-            for(int i=0; i<30; i++)
+            for(int i = 0; i < 30; i++)
             {
-                double randomAngle = minRange + (maxRange - minRange) * rand.nextDouble();
+                double randomAngle = MIN_RANGE + (MAX_RANGE - MIN_RANGE) * rand.nextDouble();
                 angles.add(randomAngle);
             }
 
-            double minAngle = maxRange;
-            int minAngleIdx = -1;
-            for(int i=0; i<30; i++)
-            {
-                if(Math.abs(angles.get(i)) < minAngle)
-                {
-                    minAngle = Math.abs(angles.get(i));
-                    minAngleIdx = i;
-                }
-            }
-
-
-            if(Math.abs(angles.get(minAngleIdx)) <= 5)
-            {
-                angleForFirstImage = angles.get(minAngleIdx);
-                angles.remove(minAngleIdx);
-                angles.add(angleForFirstImage);
-                validAngles = true;
-            }
+            if (Math.abs(angles.peek()) <= 5) break;
         }
         return angles;
     }
+
+    // TODO: This transformation method is not working still need changes (negative angles will mess up)
+    private Pair<Integer,Integer> transform(int x, int y, double theta) {
+        int newX = (int) ( x * Math.cos(theta) + y * Math.sin(theta));
+        int newY = (int) ( -x * Math.sin(theta) + y * Math.cos(theta));
+        return new Pair<>(newX, newY);
+    }
+
 }
