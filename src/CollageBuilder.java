@@ -1,53 +1,73 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class CollageBuilder {
-    private List<String> imageFilePaths;
     private List<BufferedImage> images = new ArrayList<>();
 
-    CollageBuilder(List<String> imageFilePaths) throws IOException {
-        this.imageFilePaths = imageFilePaths;
-
-        for (String urlString: imageFilePaths) {
-            System.out.println(urlString);
-
-            final URL url = new URL(urlString);
-            final HttpURLConnection connection = (HttpURLConnection) url
-                    .openConnection();
-            connection.setRequestProperty(
-                    "User-Agent",
-                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
-            BufferedImage image = ImageIO.read(connection.getInputStream());
-
+    CollageBuilder(List<BufferedImage> images) throws IOException {
+        for (BufferedImage image : images) {
             BufferedImage borderedVersion = addBorder(image);
-            images.add(borderedVersion);
+            this.images.add(borderedVersion);
         }
     }
 
-    public void createCollageWithImages() {
-        BufferedImage collageSpace = new BufferedImage(1600,1200,BufferedImage.TYPE_INT_RGB);
-        Graphics g = collageSpace.getGraphics();
+    public void createCollageWithImages(int width, int height) {
+        BufferedImage collageSpace = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = collageSpace.createGraphics();
+        ArrayList<Double> angles = GenerateAngles();
         g.setColor(Color.white);
+        int numPixels = (int) (width*height*1.5+1);
 
         for (int i = 0; i < 30; i++) {
-            if (i < 10) {
-                g.drawImage(images.get(i), i * 160, 0, null);
+            int newWidth = (int) Math.sqrt(numPixels/(30-i));
+            int newHeight = (int) Math.sqrt(numPixels/(30-i));
+            System.out.println("New width for this image " + i + "is " + newWidth);
+            System.out.println("New height for this image " + i + "is " + newHeight);
+            System.out.println("Remaining pixels: " + numPixels);
+            if(i == 0) {
+                DrawFirstImage(images.get(i), angles.get(29), g, width, height);
+                System.out.println("The min angle:" + angles.get(29));
+                double angle = Math.toRadians(angles.get(29));
+                int targetWidth = (int)(width * Math.cos(angle) + Math.abs(height * Math.sin(angle) + 1));
+                int targetHeight = (int)(width * Math.abs(Math.sin(angle)) + height * Math.cos(angle) + 1);
+                System.out.println("Target widith is " + targetWidth);
+                System.out.println("Target height is " + targetHeight);
+                numPixels = numPixels - targetWidth*targetHeight;
             }
-            else if (i < 20) {
-                g.drawImage(images.get(i), (i - 10) * 160, 400, null);
+            else if (i  < 11) {
+                System.out.println("Angle for this image" + (i-1) + " is" + angles.get(i-1));
+                double angle = Math.toRadians(angles.get(i-1));
+                AffineTransform original = g.getTransform();
+                g.rotate(angle, width/2, height/2);
+                BufferedImage filler = resize(images.get(i),newWidth, newHeight);
+                g.drawImage(filler,100 + (i - 1) * (width - 200) / 10, 50, null);
+                numPixels = numPixels - newWidth*newHeight;
+                g.setTransform(original);
+            }
+
+            else if (i < 21) {
+                AffineTransform original = g.getTransform();
+                g.rotate(Math.toRadians(angles.get(i-1)), width/2, height/2);
+                BufferedImage filler = resize(images.get(i),newWidth, newHeight);
+                g.drawImage(filler, 100 + (i - 11) * (width - 200) / 10, 50 + (height - 100) / 3 , null);
+                numPixels = numPixels - newWidth*newHeight;
+                g.setTransform(original);
             } else {
-                g.drawImage(images.get(i), (i - 20) * 160, 800, null);
+                AffineTransform original = g.getTransform();
+                g.rotate(Math.toRadians(angles.get(i-1)), width/2, height/2);
+                BufferedImage filler = resize(images.get(i),newWidth, newHeight);
+                g.drawImage(filler, 100 + (i - 21) * (width - 200) / 10, 50 + (height - 100) * 2 / 3 , null);
+                numPixels = numPixels - newWidth*newHeight;
+                g.setTransform(original);
             }
+
         }
 
         try {
@@ -83,23 +103,58 @@ public class CollageBuilder {
         return dimg;
     }
 
-    public BufferedImage rotate(BufferedImage im) {
-        AffineTransform tx = new AffineTransform();
-        tx.rotate(0.5, im.getWidth() / 2, im.getHeight() / 2);
 
-        AffineTransformOp op = new AffineTransformOp(tx,AffineTransformOp.TYPE_BILINEAR);
-        return op.filter(im, null);
-    }
-
-
-    public void DrawFirstImage(BufferedImage image, double angleInRadians, Graphics2D g, int collageWidth,
-                                      int collageHeight){
+    public void DrawFirstImage(BufferedImage image, double angle, Graphics2D g, int collageWidth,
+                               int collageHeight){
+        double angleInRadians = Math.toRadians(angle);
+        AffineTransform original = g.getTransform();
         g.rotate(angleInRadians, collageWidth/2, collageHeight/2);
         int targetWidth = (int)(collageWidth * Math.cos(angleInRadians) + Math.abs(collageHeight * Math.sin(angleInRadians)) + 1);
         int targetHeight = (int)(collageWidth * Math.abs(Math.sin(angleInRadians)) + collageHeight * Math.cos(angleInRadians) + 1);
         image = resize(image, targetWidth, targetHeight);
         g.drawImage(image,  collageWidth/2 - image.getWidth()/2,  collageHeight/2 - image.getHeight()/2, null);
+        g.setTransform(original);
     }
+    public static ArrayList<Double> GenerateAngles()
+    {
+        ArrayList<Double> angles = new ArrayList<Double>();
 
+        double minRange = -45;
+        double maxRange = 45;
+        Boolean validAngles = false;
+        double angleForFirstImage = 0;
+
+        Random rand = new Random();
+
+        while(!validAngles)
+        {
+            angles.clear();
+            for(int i=0; i<30; i++)
+            {
+                double randomAngle = minRange + (maxRange - minRange) * rand.nextDouble();
+                angles.add(randomAngle);
+            }
+
+            double minAngle = maxRange;
+            int minAngleIdx = -1;
+            for(int i=0; i<30; i++)
+            {
+                if(Math.abs(angles.get(i)) < minAngle)
+                {
+                    minAngle = Math.abs(angles.get(i));
+                    minAngleIdx = i;
+                }
+            }
+
+
+            if(Math.abs(angles.get(minAngleIdx)) <= 5)
+            {
+                angleForFirstImage = angles.get(minAngleIdx);
+                angles.remove(minAngleIdx);
+                angles.add(angleForFirstImage);
+                validAngles = true;
+            }
+        }
+        return angles;
+    }
 }
-

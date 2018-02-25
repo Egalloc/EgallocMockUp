@@ -15,11 +15,11 @@ public class Servlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         APICommunicator apiCommunicator = new APICommunicator(request.getParameter("topic"));
 
-        System.out.println("Size of image url arrays" + apiCommunicator.getImageFilePaths().size());
+        System.out.println("Size of image  arrays" + apiCommunicator.getImages().size());
 
-        CollageBuilder cb = new CollageBuilder(apiCommunicator.getImageFilePaths());
+        CollageBuilder cb = new CollageBuilder(apiCommunicator.getImages());
 
-        cb.createCollageWithImages();
+        cb.createCollageWithImages(800,600);
     }
 
 }
