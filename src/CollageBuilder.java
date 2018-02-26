@@ -11,23 +11,23 @@ import java.util.List;
 
 public class CollageBuilder {
     private List<BufferedImage> images = new Vector<>();
-    private static double IMAGE_NUMBER = 30;
-    private static double IMAGE_TO_TOTAL_RATIO = 1/20;
-    private static double TOTAL_AREA_RATIO = IMAGE_NUMBER * IMAGE_TO_TOTAL_RATIO;
-    private static int BORDER_PIXEL = 3;
-    private static int PADDING_X = 100;
-    private static int PADDING_Y = 50;
-    private static int MAXIMUM_ANGLE = 45;
-    private static int MINIMUM_ANGLE = -45;
-    private static int MINIMUM_ANGLE_FOR_FIRST_IMAGE = 5;
-    private static int IMAGE_PER_ROW = 10;
-    private static int SECOND_ROW_INDEX = IMAGE_PER_ROW + 1;
-    private static int THIRD_ROW_INDEX = IMAGE_PER_ROW * 2 + 1;
+    private static final int IMAGE_NUMBER = 30;
+    private static final double TOTAL_AREA_RATIO = 1.5;
+    private static final int BORDER_PIXEL = 3;
+    private static final int PADDING_X = 100;
+    private static final int PADDING_Y = 50;
+    private static final int MAXIMUM_ANGLE = 45;
+    private static final int MINIMUM_ANGLE = -45;
+    private static final int MINIMUM_ANGLE_FOR_FIRST_IMAGE = 5;
+    private static final int IMAGE_PER_ROW = 10;
+    private static final int SECOND_ROW_INDEX = IMAGE_PER_ROW + 1;
+    private static final int THIRD_ROW_INDEX = IMAGE_PER_ROW * 2 + 1;
 
-    CollageBuilder(List<BufferedImage> images) {
-        for (BufferedImage image : images) {
+    CollageBuilder(List<BufferedImage> imagesWithoutBorder) {
+        for (Iterator<BufferedImage> it = imagesWithoutBorder.iterator(); it.hasNext();) {
+            BufferedImage image = it.next();
             BufferedImage borderedVersion = addBorder(image);
-            this.images.add(borderedVersion);
+            images.add(borderedVersion);
         }
     }
 
