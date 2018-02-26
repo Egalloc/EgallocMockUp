@@ -11,7 +11,12 @@ import java.util.concurrent.*;
 
 public class APICommunicator {
     private String keyword;
-    private List<BufferedImage> images = new Vector<>(); // needs to be thread-safe
+    private List<BufferedImage> images = new Vector<BufferedImage>() {
+        @Override
+        public boolean add(BufferedImage image) {
+            return size() < 30 && super.add(image);
+        }
+    }; // needs to be thread-safe
     private BlockingDeque<URL> urls = new LinkedBlockingDeque<>();
 
     private static final int IMAGE_NUMBER = 30;
@@ -43,10 +48,6 @@ public class APICommunicator {
 
         executor.shutdownNow();
 
-        // Deleting extra images, if there is any
-        while (images.size() > IMAGE_NUMBER) {
-            images.remove(images.size() - 1);
-        }
     }
 
     // This change the processor to a runnable
@@ -140,13 +141,7 @@ public class APICommunicator {
 
     }
 
-
     public List<BufferedImage> getImages() {
         return images;
-    }
-
-    // Getter
-    public final String getKeyword() {
-        return keyword;
     }
 }

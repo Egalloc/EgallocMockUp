@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.List;
 
 public class CollageBuilder {
-    private List<BufferedImage> images = new Vector<>();
+    private List<BufferedImage> images = new ArrayList<>();
     private static final int IMAGE_NUMBER = 30;
     private static final double TOTAL_AREA_RATIO = 1.5;
     private static final int BORDER_PIXEL = 3;
@@ -102,7 +102,7 @@ public class CollageBuilder {
             e.printStackTrace();
         }
     }
-    
+
     private void drawImageWithCoordinate(int x, int y, Graphics2D g, BufferedImage bi) {
         g.drawImage(bi, x, y,null);
     }
