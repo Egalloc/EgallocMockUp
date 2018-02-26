@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
@@ -18,6 +19,7 @@ public class APICommunicator {
     private static final int URL_PROCESS_THREAD_NUMBER = 36;
     private static final int URL_TIMEOUT_LIMIT = 5000;
     private static final int THREAD_NUMBER = 40;
+    private static final int SLEEP_TIME = 1000;
 
     public APICommunicator(String keyword) {
         this.keyword = keyword;
@@ -34,18 +36,20 @@ public class APICommunicator {
 
         while (images.size() < IMAGE_NUMBER) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(SLEEP_TIME);
             } catch (InterruptedException e) {
             }
         }
 
         executor.shutdownNow();
 
+        // Deleting extra images, if there is any
         while (images.size() > IMAGE_NUMBER) {
             images.remove(images.size() - 1);
         }
     }
 
+    // This change the processor to a runnable
     private Runnable makeUrlProcessorRunnable() {
         return () -> {
             while (true) {
@@ -58,6 +62,7 @@ public class APICommunicator {
         };
     }
 
+    // This change the request to a runnable
     private Runnable makeRequestRunnable(int startIndex) {
         return () -> sendRequestForKeyWord(startIndex * 10 + 1);
     }
@@ -97,8 +102,8 @@ public class APICommunicator {
         }
     }
 
-    // This method extract image from response and add to the array
-    private void processAPIResponse(APIResponse apiResponse) throws IOException {
+    // This method extract image from response and add to the blocking dequeue
+    private void processAPIResponse(APIResponse apiResponse) {
         // Check NPE
         if (apiResponse.getItems() == null) return;
 
@@ -106,13 +111,15 @@ public class APICommunicator {
 
             System.out.println("Url is " + item.getLink());
 
-
-            final URL url = new URL(item.getLink());
-
-            urls.add(url);
+            try {
+                final URL url = new URL(item.getLink());
+                urls.add(url);
+            } catch (MalformedURLException e) {
+            }
         }
     }
 
+    // Process url and generate image and add to the vector
     private void processUrlForImage(URL url) {
         try {
             final HttpURLConnection connection = (HttpURLConnection) url

@@ -10,9 +10,21 @@ import java.util.*;
 import java.util.List;
 
 public class CollageBuilder {
-    private List<BufferedImage> images = new ArrayList<>();
+    private List<BufferedImage> images = new Vector<>();
+    private static double IMAGE_NUMBER = 30;
+    private static double IMAGE_TO_TOTAL_RATIO = 1/20;
+    private static double TOTAL_AREA_RATIO = IMAGE_NUMBER * IMAGE_TO_TOTAL_RATIO;
+    private static int BORDER_PIXEL = 3;
+    private static int PADDING_X = 100;
+    private static int PADDING_Y = 50;
+    private static int MAXIMUM_ANGLE = 45;
+    private static int MINIMUM_ANGLE = -45;
+    private static int MINIMUM_ANGLE_FOR_FIRST_IMAGE = 5;
+    private static int IMAGE_PER_ROW = 10;
+    private static int SECOND_ROW_INDEX = IMAGE_PER_ROW + 1;
+    private static int THIRD_ROW_INDEX = IMAGE_PER_ROW * 2 + 1;
 
-    CollageBuilder(List<BufferedImage> images) throws IOException {
+    CollageBuilder(List<BufferedImage> images) {
         for (BufferedImage image : images) {
             BufferedImage borderedVersion = addBorder(image);
             this.images.add(borderedVersion);
@@ -26,12 +38,12 @@ public class CollageBuilder {
         PriorityQueue<Double> angles = generateAngles();
 
         g.setColor(Color.white);
-        int numPixels = (int) (width * height * 1.5 + 1);
+        int numPixels = (int) (width * height * TOTAL_AREA_RATIO + 1);
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < IMAGE_NUMBER; i++) {
 
-            int newWidth = (int) Math.sqrt(numPixels/(30-i));
-            int newHeight = (int) Math.sqrt(numPixels/(30-i));
+            int newWidth = (int) Math.sqrt(numPixels/(IMAGE_NUMBER-i));
+            int newHeight = (int) Math.sqrt(numPixels/(IMAGE_NUMBER-i));
             double angle = Math.toRadians(angles.poll());
 
             System.out.println("New width for this image " + i + "is " + newWidth);
@@ -50,23 +62,23 @@ public class CollageBuilder {
                 numPixels = numPixels - targetWidth * targetHeight;
             }
 
-            else if (i  < 11) {
+            else if (i  < SECOND_ROW_INDEX) {
                 AffineTransform original = g.getTransform();
                 g.rotate(angle, width / 2, height / 2);
                 BufferedImage filler = resize(images.get(i), newWidth, newHeight);
 
-                drawImageWithNewCoordinate(100 + (i - 1) * (width - 200) / 10,50, angle, g, filler);
+                drawImageWithNewCoordinate(PADDING_X + (i - 1) * (width - PADDING_X * 2) / IMAGE_PER_ROW, PADDING_Y, angle, g, filler);
 
                 numPixels = numPixels - newWidth*newHeight;
                 g.setTransform(original);
             }
 
-            else if (i < 21) {
+            else if (i < THIRD_ROW_INDEX) {
                 AffineTransform original = g.getTransform();
                 g.rotate(angle, width / 2, height / 2);
                 BufferedImage filler = resize(images.get(i),newWidth, newHeight);
 
-                drawImageWithNewCoordinate(50 + (i - 11) * (width - 100) / 10,50 + (height - 100) / 3, angle, g, filler);
+                drawImageWithNewCoordinate(PADDING_X + (i - SECOND_ROW_INDEX) * (width - PADDING_X * 2) / IMAGE_PER_ROW,PADDING_Y + (height - PADDING_Y * 2) / 3, angle, g, filler);
 
 
                 numPixels = numPixels - newWidth * newHeight;
@@ -76,7 +88,7 @@ public class CollageBuilder {
                 g.rotate(angle, width / 2, height / 2);
                 BufferedImage filler = resize(images.get(i),newWidth, newHeight);
 
-                drawImageWithNewCoordinate(50 + (i - 21) * (width - 100) / 10,50 + (height - 100) * 2 / 3, angle, g, filler);
+                drawImageWithNewCoordinate(PADDING_X + (i - THIRD_ROW_INDEX) * (width - PADDING_X * 2) / 10,PADDING_Y + (height - PADDING_Y * 2) * 2 / 3, angle, g, filler);
 
                 numPixels = numPixels - newWidth * newHeight;
                 g.setTransform(original);
@@ -93,7 +105,7 @@ public class CollageBuilder {
         }
     }
 
-    // TODO: make the transformation working, so that the collage will look perfect
+    // TODO: make the transformation working, so that the collage will look perfect, or just delete this
     private void drawImageWithNewCoordinate(int x, int y, double theta, Graphics2D g, BufferedImage bi) {
         //Pair<Integer,Integer> newCoordinate = transform(x, y, theta);
         g.drawImage(bi, x, y,null);
@@ -102,14 +114,14 @@ public class CollageBuilder {
     // This method adds border to the image
     private BufferedImage addBorder(BufferedImage image){
         //create a new image
-        BufferedImage borderedImage = new BufferedImage(image.getWidth() + 6,image.getHeight() + 6,
+        BufferedImage borderedImage = new BufferedImage(image.getWidth() + BORDER_PIXEL * 2,image.getHeight() + BORDER_PIXEL * 2,
                 BufferedImage.TYPE_INT_RGB);
         Graphics g = borderedImage.getGraphics();
         g.setColor(Color.white);
         g.fillRect(0,0, borderedImage.getWidth(), borderedImage.getHeight());
 
         //draw the old one on the new one
-        g.drawImage(image,3,3,null);
+        g.drawImage(image,BORDER_PIXEL,BORDER_PIXEL,null);
         return borderedImage;
     }
 
@@ -129,11 +141,11 @@ public class CollageBuilder {
     private void drawFirstImage(BufferedImage image, double angle, Graphics2D g, int collageWidth,
                                int collageHeight){
         AffineTransform original = g.getTransform();
-        g.rotate(angle, collageWidth/2, collageHeight/2);
+        g.rotate(angle, collageWidth / 2, collageHeight / 2);
         int targetWidth = (int)(collageWidth * Math.cos(angle) + Math.abs(collageHeight * Math.sin(angle)) + 1);
         int targetHeight = (int)(collageWidth * Math.abs(Math.sin(angle)) + collageHeight * Math.cos(angle) + 1);
         image = resize(image, targetWidth, targetHeight);
-        g.drawImage(image,  collageWidth/2 - image.getWidth()/2,  collageHeight/2 - image.getHeight()/2, null);
+        g.drawImage(image,  collageWidth / 2 - image.getWidth() / 2,  collageHeight / 2 - image.getHeight() / 2, null);
         g.setTransform(original);
     }
 
@@ -144,24 +156,21 @@ public class CollageBuilder {
 
         Random rand = new Random();
 
-        final double MIN_RANGE = -45;
-        final double MAX_RANGE = 45;
-
         while(true)
         {
             angles.clear();
-            for(int i = 0; i < 30; i++)
+            for(int i = 0; i < IMAGE_NUMBER; i++)
             {
-                double randomAngle = MIN_RANGE + (MAX_RANGE - MIN_RANGE) * rand.nextDouble();
+                double randomAngle = MINIMUM_ANGLE + (MAXIMUM_ANGLE - MINIMUM_ANGLE) * rand.nextDouble();
                 angles.add(randomAngle);
             }
 
-            if (Math.abs(angles.peek()) <= 5) break;
+            if (Math.abs(angles.peek()) <= MINIMUM_ANGLE_FOR_FIRST_IMAGE) break;
         }
         return angles;
     }
 
-    // TODO: This transformation method is not working still need changes (negative angles will mess up)
+    // TODO: This transformation method is not working still need changes (negative angles will mess up), or just delete this
     private Pair<Integer,Integer> transform(int x, int y, double theta) {
         int newX = (int) ( x * Math.cos(theta) + y * Math.sin(theta));
         int newY = (int) ( -x * Math.sin(theta) + y * Math.cos(theta));

@@ -15,11 +15,13 @@ public class Servlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         double start = System.currentTimeMillis();
-        System.out.println("Start time: " + start);
+
 
         APICommunicator apiCommunicator = new APICommunicator(request.getParameter("topic"));
 
         System.out.println("Size of image  arrays" + apiCommunicator.getImages().size());
+
+        System.out.println("Start time: " + start);
 
         CollageBuilder cb = new CollageBuilder(apiCommunicator.getImages());
 
