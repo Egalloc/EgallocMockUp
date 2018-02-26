@@ -52,7 +52,7 @@ public class APICommunicator {
     // This change the processor to a runnable
     private Runnable makeUrlProcessorRunnable() {
         return () -> {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     processUrlForImage(urls.takeFirst());
                 } catch (InterruptedException e) {

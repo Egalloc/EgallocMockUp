@@ -1,5 +1,3 @@
-import javafx.util.Pair;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -64,10 +62,10 @@ public class CollageBuilder {
 
             else if (i  < SECOND_ROW_INDEX) {
                 AffineTransform original = g.getTransform();
-                g.rotate(angle, width / 2, height / 2);
+                g.rotate(angle, PADDING_X + (i - 1) * (width - PADDING_X * 2) / IMAGE_PER_ROW, PADDING_Y);
                 BufferedImage filler = resize(images.get(i), newWidth, newHeight);
 
-                drawImageWithNewCoordinate(PADDING_X + (i - 1) * (width - PADDING_X * 2) / IMAGE_PER_ROW, PADDING_Y, angle, g, filler);
+                drawImageWithCoordinate(PADDING_X + (i - 1) * (width - PADDING_X * 2) / IMAGE_PER_ROW, PADDING_Y, g, filler);
 
                 numPixels = numPixels - newWidth*newHeight;
                 g.setTransform(original);
@@ -75,20 +73,20 @@ public class CollageBuilder {
 
             else if (i < THIRD_ROW_INDEX) {
                 AffineTransform original = g.getTransform();
-                g.rotate(angle, width / 2, height / 2);
+                g.rotate(angle, PADDING_X + (i - SECOND_ROW_INDEX) * (width - PADDING_X * 2) / IMAGE_PER_ROW, PADDING_Y + (height - PADDING_Y * 2) / 3);
                 BufferedImage filler = resize(images.get(i),newWidth, newHeight);
 
-                drawImageWithNewCoordinate(PADDING_X + (i - SECOND_ROW_INDEX) * (width - PADDING_X * 2) / IMAGE_PER_ROW,PADDING_Y + (height - PADDING_Y * 2) / 3, angle, g, filler);
+                drawImageWithCoordinate(PADDING_X + (i - SECOND_ROW_INDEX) * (width - PADDING_X * 2) / IMAGE_PER_ROW,PADDING_Y + (height - PADDING_Y * 2) / 3, g, filler);
 
 
                 numPixels = numPixels - newWidth * newHeight;
                 g.setTransform(original);
             } else {
                 AffineTransform original = g.getTransform();
-                g.rotate(angle, width / 2, height / 2);
+                g.rotate(angle, PADDING_X + (i - THIRD_ROW_INDEX) * (width - PADDING_X * 2) / 10, PADDING_Y + (height - PADDING_Y * 2) * 2 / 3);
                 BufferedImage filler = resize(images.get(i),newWidth, newHeight);
 
-                drawImageWithNewCoordinate(PADDING_X + (i - THIRD_ROW_INDEX) * (width - PADDING_X * 2) / 10,PADDING_Y + (height - PADDING_Y * 2) * 2 / 3, angle, g, filler);
+                drawImageWithCoordinate(PADDING_X + (i - THIRD_ROW_INDEX) * (width - PADDING_X * 2) / 10,PADDING_Y + (height - PADDING_Y * 2) * 2 / 3, g, filler);
 
                 numPixels = numPixels - newWidth * newHeight;
                 g.setTransform(original);
@@ -104,10 +102,8 @@ public class CollageBuilder {
             e.printStackTrace();
         }
     }
-
-    // TODO: make the transformation working, so that the collage will look perfect, or just delete this
-    private void drawImageWithNewCoordinate(int x, int y, double theta, Graphics2D g, BufferedImage bi) {
-        //Pair<Integer,Integer> newCoordinate = transform(x, y, theta);
+    
+    private void drawImageWithCoordinate(int x, int y, Graphics2D g, BufferedImage bi) {
         g.drawImage(bi, x, y,null);
     }
 
@@ -170,11 +166,5 @@ public class CollageBuilder {
         return angles;
     }
 
-    // TODO: This transformation method is not working still need changes (negative angles will mess up), or just delete this
-    private Pair<Integer,Integer> transform(int x, int y, double theta) {
-        int newX = (int) ( x * Math.cos(theta) + y * Math.sin(theta));
-        int newY = (int) ( -x * Math.sin(theta) + y * Math.cos(theta));
-        return new Pair<>(newX, newY);
-    }
 
 }
