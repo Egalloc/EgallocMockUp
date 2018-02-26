@@ -1,6 +1,4 @@
 import com.google.gson.Gson;
-import sun.util.resources.cldr.fr.CalendarData_fr_BL;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -17,12 +15,14 @@ public class APICommunicator {
 
     private static final int IMAGE_NUMBER = 30;
     private static final int API_REQUEST_THREAD_NUMBER = 4;
-    private static final int URL_PROCESS_THREAD_NUMBER = 27;
+    private static final int URL_PROCESS_THREAD_NUMBER = 36;
+    private static final int URL_TIMEOUT_LIMIT = 5000;
+    private static final int THREAD_NUMBER = 40;
 
     public APICommunicator(String keyword) {
         this.keyword = keyword;
 
-        ExecutorService executor = Executors.newFixedThreadPool(32);
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
 
         for (int i = 0; i < API_REQUEST_THREAD_NUMBER; i++) {
             executor.submit(makeRequestRunnable(i));
@@ -41,7 +41,7 @@ public class APICommunicator {
 
         executor.shutdownNow();
 
-        while (images.size() > 30) {
+        while (images.size() > IMAGE_NUMBER) {
             images.remove(images.size() - 1);
         }
     }
@@ -52,6 +52,7 @@ public class APICommunicator {
                 try {
                     processUrlForImage(urls.takeFirst());
                 } catch (InterruptedException e) {
+                    return;
                 }
             }
         };
@@ -77,6 +78,9 @@ public class APICommunicator {
 
             HttpURLConnection connection = (HttpURLConnection) new URL(url + "?" + query).openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
+
+            connection.setConnectTimeout(URL_TIMEOUT_LIMIT);
+
             InputStream response = connection.getInputStream();
 
 
@@ -110,7 +114,6 @@ public class APICommunicator {
     }
 
     private void processUrlForImage(URL url) {
-
         try {
             final HttpURLConnection connection = (HttpURLConnection) url
                     .openConnection();
@@ -118,6 +121,7 @@ public class APICommunicator {
                     "User-Agent",
                     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
 
+            connection.setConnectTimeout(URL_TIMEOUT_LIMIT);
             BufferedImage image = ImageIO.read(url.openStream());
 
             if (image != null) {
