@@ -13,6 +13,10 @@ public class Servlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        double start = System.currentTimeMillis();
+        System.out.println("Start time: " + start);
+
         APICommunicator apiCommunicator = new APICommunicator(request.getParameter("topic"));
 
         System.out.println("Size of image  arrays" + apiCommunicator.getImages().size());
@@ -20,6 +24,9 @@ public class Servlet extends HttpServlet {
         CollageBuilder cb = new CollageBuilder(apiCommunicator.getImages());
 
         cb.createCollageWithImages(800,600);
+
+        double duration = System.currentTimeMillis() - start;
+        System.out.println("Duration: " + duration);
     }
 
 }
