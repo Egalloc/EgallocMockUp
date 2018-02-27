@@ -13,14 +13,8 @@ import java.util.concurrent.*;
 
 public class APICommunicator {
     private String keyword;
-    private List<BufferedImage> images = new Vector<BufferedImage>() {
-        @Override
-        public boolean add(BufferedImage image) {
-            return size() < IMAGE_NUMBER && super.add(image);
-        }
-    }; // needs to be thread-safe
-    private BlockingDeque<URL> urls = new LinkedBlockingDeque<>();
 
+    // Static constants
     private static final int IMAGE_NUMBER = 30;
     private static final int API_REQUEST_THREAD_NUMBER = 4;
     private static final int URL_PROCESS_THREAD_NUMBER = 36;
@@ -29,10 +23,32 @@ public class APICommunicator {
     private static final int SLEEP_TIME = 1000;
     private static final int ELEMENT_PER_REQUEST = 10;
     private static final int SLEEP_TIME_OUT = 10;
-    private static final String URL_REQUEST_PROPERTY = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) " +
+    private static final String URL_REQUEST_PROPERTY_KEY = "User-Agent";
+    private static final String URL_REQUEST_PROPERTY_VALUE = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) " +
             "AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31";
+    private static final String REQUEST_URL = "https://www.googleapis.com/customsearch/v1";
+    private static final String API_KEY = "AIzaSyBjefw6KjolHODgNI2IZhvYh7jzoSzG44A";
+    private static final String CX = "010274188002515510907:oecl9salb6i";
+    private static final String SEARCH_TYPE = "image";
+    private static final String API_REQUEST_PROPERTY_KEY = "Content-Type";
+    private static final String API_REQUEST_PROPERTY_VALUE = "application/json";
 
+    // The images vector's add method are overridden, so that it won't exceed IMAGE_NUMBER images.
+    // And it needs to be thread-safe. So we use vector.
+    private List<BufferedImage> images = new Vector<BufferedImage>() {
+        @Override
+        public boolean add(BufferedImage image) {
+            return size() < IMAGE_NUMBER && super.add(image);
+        }
+    };
+    // This is the blocking deque which holds all the URLs
+    private BlockingDeque<URL> urls = new LinkedBlockingDeque<>();
 
+    /*
+    This is the constructor of the APICommunicator, it takes in one keyword and request Google Custom Search API
+    for result. It will add the result images to the image vector. Then the Servlet will call get images to get the
+    BufferedImages.
+    */
     public APICommunicator(String keyword) {
         this.keyword = keyword;
 
@@ -49,19 +65,13 @@ public class APICommunicator {
         }
 
         int sleepTime = 0;
-        
         while (images.size() < IMAGE_NUMBER && sleepTime < SLEEP_TIME_OUT) {
             try {
                 Thread.sleep(SLEEP_TIME);
             } catch (InterruptedException e) {
-
             }
-            System.out.println("sleeping");
             sleepTime++;
         }
-        
-        System.out.println("shutdown");
-        System.out.println("Image size is " + images.size() );
         executor.shutdownNow();
 
     }
@@ -73,8 +83,6 @@ public class APICommunicator {
                 try {
                     processUrlForImage(urls.takeFirst());
                 } catch (InterruptedException e) {
-                    System.out.println("Current Thread is" + Thread.currentThread().getName());
-                    System.out.println("Current Thread is doing" + Thread.currentThread().getName());
                     return;
                 }
             }
@@ -88,20 +96,21 @@ public class APICommunicator {
 
     // This method send request for keyword to the Google Custom Search API and retrieve 10 images back.
     private void sendRequestForKeyWord(int startIndex) {
+
         // Create Query
-        String url = "https://www.googleapis.com/customsearch/v1";
+        String url = REQUEST_URL;
         Map<String, String> parameters = new HashMap<>();
         parameters.put("q", keyword);
-        parameters.put("key", "AIzaSyBjefw6KjolHODgNI2IZhvYh7jzoSzG44A");
-        parameters.put("cx", "010274188002515510907:oecl9salb6i");
+        parameters.put("key", API_KEY);
+        parameters.put("cx", CX);
         parameters.put("start", Integer.toString(startIndex));
-        parameters.put("searchType", "image");
+        parameters.put("searchType",SEARCH_TYPE);
 
         try {
             String query = ParameterStringBuilder.getParamsString(parameters);
 
             HttpURLConnection connection = (HttpURLConnection) new URL(url + "?" + query).openConnection();
-            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty(API_REQUEST_PROPERTY_KEY, API_REQUEST_PROPERTY_VALUE);
 
             connection.setConnectTimeout(URL_TIMEOUT_LIMIT);
 
@@ -143,9 +152,7 @@ public class APICommunicator {
         try {
             final HttpURLConnection connection = (HttpURLConnection) url
                     .openConnection();
-            connection.setRequestProperty(
-                    "User-Agent", URL_REQUEST_PROPERTY
-                    );
+            connection.setRequestProperty(URL_REQUEST_PROPERTY_KEY, URL_REQUEST_PROPERTY_VALUE);
 
             connection.setConnectTimeout(URL_TIMEOUT_LIMIT);
             BufferedImage image = ImageIO.read(url.openStream());
@@ -159,6 +166,7 @@ public class APICommunicator {
 
     }
 
+    // The getter to get the images
     public List<BufferedImage> getImages() {
         return images;
     }
