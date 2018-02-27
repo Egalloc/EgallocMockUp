@@ -22,8 +22,7 @@ public class CollageBuilder {
     private static final int THIRD_ROW_INDEX = IMAGE_PER_ROW * 2 + 1;
 
     CollageBuilder(List<BufferedImage> imagesWithoutBorder) {
-        for (Iterator<BufferedImage> it = imagesWithoutBorder.iterator(); it.hasNext();) {
-            BufferedImage image = it.next();
+        for (BufferedImage image : imagesWithoutBorder) {
             BufferedImage borderedVersion = addBorder(image);
             images.add(borderedVersion);
         }
@@ -148,7 +147,7 @@ public class CollageBuilder {
     // This method generates a min heap of random angles. It is compared by absolute values
     private PriorityQueue<Double> generateAngles()
     {
-        PriorityQueue<Double> angles = new PriorityQueue<>(30, Comparator.comparingDouble(Math::abs));
+        PriorityQueue<Double> angles = new PriorityQueue<>(IMAGE_NUMBER, Comparator.comparingDouble(Math::abs));
 
         Random rand = new Random();
 

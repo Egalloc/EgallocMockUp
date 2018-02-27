@@ -1,8 +1,6 @@
-import java.util.List;
-
 public class APIResponse {
-    SearchInfo searchInformation;
-    Item[] items;
+    private SearchInfo searchInformation;
+    private Item[] items;
 
     public SearchInfo getSearchInformation() {
         return searchInformation;

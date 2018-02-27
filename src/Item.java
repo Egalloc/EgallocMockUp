@@ -1,6 +1,6 @@
 public class Item {
-    String link;
-    Image image;
+    private String link;
+    private Image image;
 
     public Image getImage() {
         return image;
