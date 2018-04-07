@@ -5,40 +5,46 @@ import java.awt.image.BufferedImage;
 import data.ResultType.ResultType;
 
 public class Result {
-	ResultType resultType = null;
-	public String keyword = null;
-	public String errorMessage = null;
-	public BufferedImage collageImage = null;
-	
+	/* PRIVATE VARIABLE DECLARATIONS */
+	private ResultType resultType = null;
+	private String keyword = null;
+	private String errorMessage = null;
+	private BufferedImage collageImage = null;
+
+	/* CONSTRUCTORS */
+	// Used for Failures/Errors
 	public Result(ResultType resultType, String keyword, String errorMessage) {
 		this.resultType = resultType;
 		this.keyword = keyword;
 		this.errorMessage = errorMessage;
 	}
-	
+
+	// Used for Successes/Collages
 	public Result(ResultType resultType, String keyword, BufferedImage image) {
 		this.resultType = resultType;
 		this.keyword = keyword;
 		this.collageImage = image;
 	}
-	
+
+	/* GETTERS */
 	public String getKeyword() {
 		return keyword;
+	}
+
+	public boolean isSuccess() {
+		return resultType == ResultType.success;
+	}
+
+	public boolean isFailure() {
+		return resultType == ResultType.failure;
 	}
 	
 	public BufferedImage getCollageImage() {
 		return collageImage;
 	}
-	
-	public String getErrorMessage() {		// if success, holds imageFilePath; if failure, holds error message
+
+	public String getErrorMessage() {
 		return errorMessage;
 	}
-	
-	public boolean isSuccess() {
-		return resultType == ResultType.success;
-	}
-	
-	public boolean isFailure() {
-		return resultType == ResultType.failure;
-	}
+
 }

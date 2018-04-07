@@ -1,7 +1,8 @@
 function checkForText() {
 	let input = document.getElementById("search-bar-input").value;
-	if (input.length == 0) {
+	if (input.length === 0) {
 		// do nothing
+		console.log("Input length is 0")
 	} else {
 		// input exists, start build collage process
 		buildCollage();
@@ -18,7 +19,7 @@ function buildCollage() {
 			if (xhttp.status === 200) {
 				redirectToSecondPage(xhttp.responseText);
 			} else {
-				console.error("errorr: " + xhttp.responseText);
+				console.error("error: " + xhttp.responseText);
 			}
 		}
 	};

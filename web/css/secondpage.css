@@ -1,4 +1,4 @@
-/* SET-UP */
+/* PAGE */
 html, body {
 	background-color: white;
 }
@@ -9,7 +9,8 @@ html, body {
 	margin: 0 auto;
 }
 
-/* COLLAGE-GENERATOR */
+/* COLLAGE / ERROR-MESSAGE AREA */
+/* located in #collage-area */
 #collage-generator {
   position: relative;
   width: 100%;
@@ -20,9 +21,10 @@ html, body {
 }
 
 #collage-caption {
-  font-size: 24px;
+  font-size: 24pt;
   padding: 15px 0;
   padding-top: 30px;
+  color: black;
 }
 
 .collage-area {
@@ -32,7 +34,7 @@ html, body {
   min-height: 600px;
   background-color: white;
   margin: 0 auto;
-  font-size: 18px;
+  font-size: 18pt;
 }
 
 .display-collage {
@@ -47,14 +49,18 @@ html, body {
 }
 
 #error-text {
-  font-size: 18px;
+  font-size: 18pt;
   padding-top: 250px;
 }
 
 .error-message {
 	padding-top: 275px;
+	color: black;
 }
 
+
+/* SEARCH & EXPORT BAR */
+/* located in #search-container */
 #search-container {
   padding: 10px 0;
 }
@@ -64,29 +70,13 @@ html, body {
   padding: 15px 0;
 }
 
-#search-bar-input {
-  min-width: 40vw;
-  max-width: 70vw;
-  padding: 10px;
-  font-size: 12px;
-  border-color: #555;
-  border-width: 1px;
-}
-
-.search-bar-button {
-  margin-left: 10px;
-  padding: 10px;
-  background-color: #555;
-  color: white;
-  font-size: 12px;
-}
-
 /* SAVED COLLAGES */
+/* located in #saved-collages */
 #saved-collages {
   position: relative;
   background-color: white;
   padding: 20px 0;
-  
+
   /* for horizontal scroll */
   width: auto;
   height: 120px;

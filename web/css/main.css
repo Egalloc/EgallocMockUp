@@ -1,4 +1,4 @@
-/* SET-UP */
+/* PAGE */
 html, body {
   	width: 100%;
 	height: 100%;
@@ -12,3 +12,30 @@ html, body {
   	height: 100%;
 }
 
+/* SEARCH BAR & EXPORT */
+
+#search-bar-container {
+  display: inline-table;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#search-bar-input {
+  min-width: 40vw;
+  max-width: 70vw;
+  padding: 10px;
+  font-size: 12pt;
+  border-color: #555;
+  border-width: 1px;
+  background-color: white;
+}
+
+.search-bar-button {
+  margin-left: 10px;
+  padding: 10px;
+  background-color: #555;
+  color: white;
+  font-size: 12px;
+}

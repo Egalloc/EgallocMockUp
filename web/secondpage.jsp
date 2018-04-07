@@ -50,7 +50,7 @@
 	href="css/secondpage.css"
 >
 <script
-	src="js/buildcollage.js"
+	src="js/buildCollage.js"
 	type="text/javascript"
 ></script>
 <script type="text/javascript">
@@ -102,6 +102,9 @@
 					<%
 						Result currentResult = (Result) session.getAttribute(Constants.SESSION_CURRENT_RESULT);
 						String caption = "";
+						if (currentResult == null) {
+							System.out.println("current result is null");
+						}
 						if (currentResult.isSuccess()) {
 							caption = "Collage for " + currentResult.getKeyword();
 						}
